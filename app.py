@@ -8,7 +8,7 @@ TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN")
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 
 TELEGRAM_API_URL = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}"
-GEMINI_API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={GEMINI_API_KEY}"
+GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent"
 
 SYSTEM_PROMPT = """أنت "سند"، مساعد ذكي مختص بمساعدة صاحب صفحات سوشيال ميديا (فيسبوك، إنستجرام، تيك توك)
 لبيع عقارات وأراضي في حلب وريفها. مهمتك:
@@ -29,19 +29,31 @@ def ask_gemini(chat_id, user_message):
     history.append({"role": "user", "parts": [{"text": user_message}]})
     history = history[-MAX_HISTORY:]
 
-    response = requests.post(
-        GEMINI_API_URL,
-        json={
-            "system_instruction": {"parts": [{"text": SYSTEM_PROMPT}]},
-            "contents": history,
-        },
-        timeout=60,
-    )
-    data = response.json()
+    try:
+        response = requests.post(
+            GEMINI_API_URL,
+            headers={
+                "x-goog-api-key": GEMINI_API_KEY,
+                "Content-Type": "application/json",
+            },
+            json={
+                "system_instruction": {"parts": [{"text": SYSTEM_PROMPT}]},
+                "contents": history,
+            },
+            timeout=60,
+        )
+        data = response.json()
+        print("GEMINI STATUS:", response.status_code)
+        print("GEMINI RESPONSE:", data)
+    except Exception as e:
+        print("GEMINI EXCEPTION:", e)
+        return "صار خطأ بالاتصال بالمساعد الذكي، جرب كمان مرة بعد شوي."
 
     try:
         reply_text = data["candidates"][0]["content"]["parts"][0]["text"]
     except (KeyError, IndexError):
+        error_msg = data.get("error", {}).get("message", "unknown error")
+        print("GEMINI ERROR MSG:", error_msg)
         reply_text = "صار خطأ بالاتصال بالمساعد الذكي، جرب كمان مرة بعد شوي."
 
     history.append({"role": "model", "parts": [{"text": reply_text}]})
