@@ -8,7 +8,8 @@ TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN")
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 
 TELEGRAM_API_URL = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}"
-GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent"
+GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent"
+
 
 SYSTEM_PROMPT = """أنت "سند"، مساعد ذكي مختص بمساعدة صاحب صفحات سوشيال ميديا (فيسبوك، إنستجرام، تيك توك)
 لبيع عقارات وأراضي في حلب وريفها. مهمتك:
